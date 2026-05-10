@@ -361,6 +361,7 @@ end
             legend('Comp. 1', 'Comp. 2', 'Comp. 3');
     end;
     temp=mean(ampEst); temp=max(temp);
+    if isnan(temp) || temp==0, temp=1; end
     axis([-1*preStimulusTime ((sampNum-5)*sampPeri-preStimulusTime) -1*temp  1.2*temp])  ;
     disp(['reject ratio: ' num2str(length(rejectIndex)/length(rejectFlag))]);
     ylabel('Amplitude (uV)');
