@@ -72,8 +72,6 @@ switch lower(Name)
 
         case {'lu'} % Paremeters for monkey Lui
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
-        dataPath = fullfile(scriptDir, '..', 'results', 'LU', filesep);
-        if ~exist(dataPath, 'dir'), mkdir(dataPath); end
         combinFile('lu', 1, 'lu22_');
         dataNameGo= 'lugo_grp';
         dataNameNogo='lunogo_grp';
@@ -129,6 +127,12 @@ dataNogo=dataAllNogo(1:end,:,:);
 chanNum=length(chanSet); % channel number for test
 %%%%%%%%%%%%%%%%%%%%
 for go_or_nogo = [1, 0]
+if go_or_nogo==1
+    dataPath = fullfile(scriptDir, '..', 'results', 'LU', 'Go', filesep);
+else
+    dataPath = fullfile(scriptDir, '..', 'results', 'LU', 'Nogo', filesep);
+end
+if ~exist(dataPath, 'dir'), mkdir(dataPath); end
 figNum=0;
 for kkk=1:chanNum
     chanNo=chanSet(kkk); % Tested channel #
