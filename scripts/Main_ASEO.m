@@ -260,7 +260,7 @@ end
     % plot the variances of residual signals after removing ERPs
     figure(figNum)
     var_ori=mean( dataChanGo.*dataChanGo, 2) - mean(dataChanGo,2).^2 ; % variance of residual signal after removing AERP
-    temp=residualSignalTime(1:sampNum,acceptIndex);   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
+    temp=real(residualSignalTime(1:sampNum,acceptIndex));   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusSamp, var_ori, '--b', (1:sampPeri:(sampNum*sampPeri))-preStimulusSamp,var_red, '-r');
     ylabel('Power');
     xlabel('Time (ms)');
@@ -304,7 +304,7 @@ end
     residualAERP=real(mean(residualSignalTime(1:sampNum,:),2));
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, AERP,'-b'); %
     hold on;
-    plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, RestoreAERP,'--r');
+    plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, real(RestoreAERP),'--r');
     hold on;
     legend('AERP', 'Recovered AERP')
     ylabel('Amplitude (uV)');
