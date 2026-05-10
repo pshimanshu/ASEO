@@ -363,10 +363,13 @@ end
     temp=mean(ampEst); temp=max(temp);
     if isnan(temp) || temp==0, temp=1; end
     axis([-1*preStimulusTime ((sampNum-5)*sampPeri-preStimulusTime) -1*temp  1.2*temp])  ;
-    disp(['reject ratio: ' num2str(length(rejectIndex)/length(rejectFlag))]);
+    condStr = 'Nogo'; if go_or_nogo==1, condStr = 'Go'; end
+    nRej = length(rejectIndex); nTot = length(rejectFlag);
+    disp(['[Chan ' num2str(chanNo) ' | ' condStr ' | ch ' num2str(kkk) '/' num2str(chanNum) '] ' ...
+          'reject ratio: ' num2str(nRej) '/' num2str(nTot) ' (' num2str(100*nRej/nTot,'%.1f') '%)']);
     ylabel('Amplitude (uV)');
     xlabel('Time (ms)');
-    title(['reject ratio: ' num2str(length(rejectIndex)/length(rejectFlag))]);
+    title(['Chan ' num2str(chanNo) ' ' condStr ' — reject ' num2str(nRej) '/' num2str(nTot)]);
     myboldify1;
     print('-djpeg',[dataPath dataName '_ASEO_ERP_chan' num2str(chanNo)  '.jpg']);
 

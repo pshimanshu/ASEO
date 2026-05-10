@@ -35,6 +35,7 @@ function [ongoing]=drawOnging(coeffAR,sigma)
       title('power of ongoing activity after ASEO removal of ERP');
       grid;
       myboldify1;
-      tmp=max(abs(ongoing));
+      tmp=max(abs(ongoing(:)));
+      if isnan(tmp) || tmp==0, tmp=1; end
       axis([0 sampFreq/4 0 tmp]);
 %end; 
