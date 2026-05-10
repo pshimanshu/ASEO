@@ -19,14 +19,14 @@ for i=1:length(ha)
   hc = get(ha(i),'Children');
   for j=1:length(hc)
     chtype = get(hc(j),'Type');
-   if chtype(1:4) == 'text'
+   if strcmp(chtype(1:4), 'text')
      set(hc(j),'FontSize',14);         % 14 pt descriptive labels
 %     set(hc(j),'FontWeight','Bold');
-    elseif chtype(1:4) == 'line'
-      set(hc(j),'LineWidth',2); 
+    elseif strcmp(chtype(1:4), 'line')
+      set(hc(j),'LineWidth',2);
     end
   end
-  if get(ha(i),'Type') == 'axes'        % Axis format
+  if strcmp(get(ha(i),'Type'), 'axes')        % Axis format
     % Determine the scale in inches
     units = get(ha(i),'Units');         % Units setting on axis
     set(ha(i),'Units','normalized');
