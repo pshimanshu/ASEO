@@ -21,7 +21,7 @@ global thresholdAmpL;
 global thresholdCorr;
 
 LoadFlag=0; % if LoadFlag==0, run ASEO algorithm; else reload and plot previous results.
-go_or_nogo=1;% if go_or_nogo==1, go; ==0, nogo;
+% go_or_nogo loops over [1,0] below (1=Go, 0=Nogo)
 Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat)
 chanSet=[5];  % Channel # we want to test:   channel # 7: somm, channel #8:somv, channel
 chanNum=length(chanSet); % Number of tested channels
@@ -126,9 +126,10 @@ dataNogo=dataAllNogo(1:end,:,:);
 [sampNum, chanNumTotal, trialNumNogo]=size(dataNogo); % SampNum: Sample number; chanNumTotal: total channel number; tiralNumNogo: Nogo trial Number
 [sampNum, chanNumTotal, trialNumGo]=size(dataGo); % SampNum: Sample number; chanNumTotal: total channel number; tiralNumNogo: GO trial Number
 
-figNum=0;
 chanNum=length(chanSet); % channel number for test
 %%%%%%%%%%%%%%%%%%%%
+for go_or_nogo = [1, 0]
+figNum=0;
 for kkk=1:chanNum
     chanNo=chanSet(kkk); % Tested channel #
     figNum=chanNo*15;
@@ -444,7 +445,8 @@ end
     print('-djpeg',[dataPath dataName '_ASEO_Ongoing_chan' '_chan' num2str(chanNo) '.jpg']);
     hold on;
 
- end;
-% 
+ end; % end for kkk
+end; % end for go_or_nogo
+%
 % %load handel
 % %sound(y,Fs)
