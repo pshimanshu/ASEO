@@ -1,8 +1,8 @@
 function function_FT
-scriptDir = fileparts(mfilename('fullpath'));
-addpath(fullfile(scriptDir, '..', 'src'));
 close all;
 clear all;
+scriptDir = fileparts(mfilename('fullpath'));
+addpath(fullfile(scriptDir, '..', 'src'));
 
 global dataPath;
 global sourcePath;
