@@ -22,7 +22,7 @@ global thresholdCorr;
 
 LoadFlag=0; % if LoadFlag==0, run ASEO algorithm; else reload and plot previous results.
 go_or_nogo=1;% if go_or_nogo==1, go; ==0, nogo;
-Name='GE'; % Monkey Name
+Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat)
 chanSet=[5];  % Channel # we want to test:   channel # 7: somm, channel #8:somv, channel
 chanNum=length(chanSet); % Number of tested channels
 
@@ -72,7 +72,7 @@ switch lower(Name)
         case {'lu'} % Paremeters for monkey Lui
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
         dataPath = fullfile(scriptDir, '..', 'results', 'LU', filesep);
-        combinFile('lu',3, 'lu30', 'lu22', 'luav');
+        combinFile('lu', 1, 'lu22_');
         dataNameGo= 'lugo_grp';
         dataNameNogo='lunogo_grp';
 
