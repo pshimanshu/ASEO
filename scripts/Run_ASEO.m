@@ -2,6 +2,7 @@
 % Code written for the CNV
 
 clear;
+addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'src'));
 
 pathname = 'C:\Users\Vladimir Liu\SkyDrive\';
 filename = 'Sub14_EpochsArtRej_zm.mat';

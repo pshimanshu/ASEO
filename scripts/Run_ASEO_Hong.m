@@ -4,6 +4,7 @@
 % modify data dir, ASEO parameters, etc before use
 
 clear all;
+addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'src'));
 
 load('RI2017_HC_Subject_Clean.mat', '-mat');
 Ns = length(RI2017_HC_Subject);

@@ -1,4 +1,6 @@
 function function_FT
+scriptDir = fileparts(mfilename('fullpath'));
+addpath(fullfile(scriptDir, '..', 'src'));
 close all;
 clear all;
 
@@ -44,8 +46,8 @@ preStimulusSamp = round(preStimulusTime/sampPeri); %Sample number of prestimulus
 % load data and set initial parameters for each monkey
 switch lower(Name)
     case {'tio'} % Paremeters for monkey TIO
-        sourcePath='C:\Xue\Nakamura_Monkey_LFP_data\TIO_dis\'; % path of the source data
-        dataPath='C:\Xue\ASEO\results\'; % Folder to save the results
+        sourcePath = fullfile(scriptDir, '..', 'data', filesep); % path of the source data
+        dataPath = fullfile(scriptDir, '..', 'results', filesep); % Folder to save the results
     combinFile('tio', 1, 'ti03111824', 'ti21', 'ti22','ti03'); % Combine several block data
     %    combinFile('tio', 3, 'ti10', 'tiad', 'tiae');
         dataNameGo= 'tiogo_grp'; % file name for the GO data
@@ -68,8 +70,8 @@ switch lower(Name)
                          498 400 498 490 498    498 450 498 350 500    400 250 498   400 450;];%%%only chan #11 12 14 were selected
 
         case {'lu'} % Paremeters for monkey Lui
-        sourcePath='C:\Xue\Nakamura_Monkey_LFP_data\Brovoli_LU\';
-        dataPath='C:\Xue\ASEO\results\LU\';
+        sourcePath = fullfile(scriptDir, '..', 'data', filesep);
+        dataPath = fullfile(scriptDir, '..', 'results', 'LU', filesep);
         combinFile('lu',3, 'lu30', 'lu22', 'luav');
         dataNameGo= 'lugo_grp';
         dataNameNogo='lunogo_grp';
@@ -84,8 +86,8 @@ switch lower(Name)
     case {'ge'}  % Paremeters for monkey GE
         %    sourcePath='E:\Document\lzxu\my program\dVCA\Monkey_GE\';
         %    dataPath='E:\Document\lzxu\my program\Estimation\dataMonkey_GE\';
-        sourcePath='C:\Xue\Nakamura_Monkey_LFP_data\GE_dis\';
-        dataPath='C:\Xue\ASEO\results\GE_dis\111406\';
+        sourcePath = fullfile(scriptDir, '..', 'data', filesep);
+        dataPath = fullfile(scriptDir, '..', 'results', 'GE_dis', '111406', filesep);
         combinFile('ge', 1, 'ge57_61_70', 'ge58', 'ge59','ge60');
         dataNameGo= 'gego_grp_1115';
         dataNameNogo='genogo_grp_1115';
