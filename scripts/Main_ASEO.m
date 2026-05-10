@@ -22,7 +22,7 @@ global thresholdCorr;
 
 LoadFlag=0; % if LoadFlag==0, run ASEO algorithm; else reload and plot previous results.
 % go_or_nogo loops over [1,0] below (1=Go, 0=Nogo)
-Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat)
+Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat as inputs, outputs as lu_go_grp.mat / lu_nogo_grp.mat)
 chanSet=[5];  % Channel # we want to test:   channel # 7: somm, channel #8:somv, channel
 chanNum=length(chanSet); % Number of tested channels
 
@@ -49,11 +49,11 @@ switch lower(Name)
         sourcePath = fullfile(scriptDir, '..', 'data', filesep); % path of the source data
         dataPath = fullfile(scriptDir, '..', 'results', filesep); % Folder to save the results
         if ~exist(dataPath, 'dir'), mkdir(dataPath); end
-    combinFile('tio', 1, 'ti03111824', 'ti21', 'ti22','ti03'); % Combine several block data
-    %    combinFile('tio', 3, 'ti10', 'tiad', 'tiae');
-        dataNameGo= 'tiogo_grp'; % file name for the GO data
-   
-        dataNameNogo='tionogo_grp'; % File name for NOGO data
+    combinFile('tio_', 1, 'ti03111824', 'ti21', 'ti22','ti03'); % Combine several block data
+    %    combinFile('tio_', 3, 'ti10', 'tiad', 'tiae');
+        dataNameGo= 'tio_go_grp'; % file name for the GO data
+
+        dataNameNogo='tio_nogo_grp'; % File name for NOGO data
                                 
         % Initial parameters
         compNumSet=[2 2 2 2 2    2 2 2 2 2   2 2 2 2 ]; % Chosen ERP component for each channel
@@ -72,9 +72,9 @@ switch lower(Name)
 
         case {'lu'} % Paremeters for monkey Lui
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
-        combinFile('lu', 1, 'lu22_');
-        dataNameGo= 'lugo_grp';
-        dataNameNogo='lunogo_grp';
+        combinFile('lu_', 1, 'lu22_');
+        dataNameGo= 'lu_go_grp';
+        dataNameNogo='lu_nogo_grp';
 
         % % % % parameters of lu22go_grp
         compNumSet=[2 2 2 2 2    2 2 2 2 2   2 2 2 2 1   1];
@@ -89,9 +89,9 @@ switch lower(Name)
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
         dataPath = fullfile(scriptDir, '..', 'results', 'GE_dis', '111406', filesep);
         if ~exist(dataPath, 'dir'), mkdir(dataPath); end
-        combinFile('ge', 1, 'ge57_61_70', 'ge58', 'ge59','ge60');
-        dataNameGo= 'gego_grp_1115';
-        dataNameNogo='genogo_grp_1115';
+        combinFile('ge_', 1, 'ge57_61_70', 'ge58', 'ge59','ge60');
+        dataNameGo= 'ge_go_grp_1115';
+        dataNameNogo='ge_nogo_grp_1115';
         % % % parameters of GE
         compNumSet=[2 2 2 2 2   2 2 2 2 2   2 2 2 2];
         waveformInitSet =[  0  00 50  00  50      60   0  100  00    00    00  00  50  00; ...
