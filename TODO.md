@@ -6,12 +6,12 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
 
 ## Step 1 — B: Complete Real-Data Results (Existing LU Data)
 
-- [ ] Fix typo in PSD plot title: `"AESO"` → `"ASEO"` in `drawOnging.m`
-- [ ] Investigate Comp 1 parameter tuning:
-  - Latency distribution is hitting ±80 ms search boundaries — widen `searchWindowSet` for Comp 1 or inspect `waveformInitSet` initialization window
-  - Estimated Comp 1 waveform is jagged — consider adjusting component time window in `waveformInitSet`
-- [ ] Run analysis on all 16 channels (currently only channel 5 via `chanSet=[5]`)
-- [ ] Run both Go and Nogo conditions across all channels
+- [x] Fix typo in PSD plot title: `"AESO"` → `"ASEO"` in `drawOnging.m`
+- [x] Investigate Comp 1 parameter tuning:
+  - Widened `searchWindowSet` Comp 1 to ±120 ms (was ±80 ms)
+  - Extended LU ch5 Comp 1 `waveformInitSet` window: start 70→50 ms, end 170→200 ms
+- [x] Run analysis on all 16 channels (`chanSet=1:16`)
+- [ ] Run both Go and Nogo conditions across all channels (already looped; verify output after running)
 
 ---
 
