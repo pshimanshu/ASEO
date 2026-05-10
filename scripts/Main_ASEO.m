@@ -48,6 +48,7 @@ switch lower(Name)
     case {'tio'} % Paremeters for monkey TIO
         sourcePath = fullfile(scriptDir, '..', 'data', filesep); % path of the source data
         dataPath = fullfile(scriptDir, '..', 'results', filesep); % Folder to save the results
+        if ~exist(dataPath, 'dir'), mkdir(dataPath); end
     combinFile('tio', 1, 'ti03111824', 'ti21', 'ti22','ti03'); % Combine several block data
     %    combinFile('tio', 3, 'ti10', 'tiad', 'tiae');
         dataNameGo= 'tiogo_grp'; % file name for the GO data
@@ -72,6 +73,7 @@ switch lower(Name)
         case {'lu'} % Paremeters for monkey Lui
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
         dataPath = fullfile(scriptDir, '..', 'results', 'LU', filesep);
+        if ~exist(dataPath, 'dir'), mkdir(dataPath); end
         combinFile('lu', 1, 'lu22_');
         dataNameGo= 'lugo_grp';
         dataNameNogo='lunogo_grp';
@@ -88,6 +90,7 @@ switch lower(Name)
         %    dataPath='E:\Document\lzxu\my program\Estimation\dataMonkey_GE\';
         sourcePath = fullfile(scriptDir, '..', 'data', filesep);
         dataPath = fullfile(scriptDir, '..', 'results', 'GE_dis', '111406', filesep);
+        if ~exist(dataPath, 'dir'), mkdir(dataPath); end
         combinFile('ge', 1, 'ge57_61_70', 'ge58', 'ge59','ge60');
         dataNameGo= 'gego_grp_1115';
         dataNameNogo='genogo_grp_1115';
