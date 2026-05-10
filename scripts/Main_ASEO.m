@@ -34,7 +34,7 @@ thresholdCorr =0.6;  %minimum correlation with the original data
 maxIterNum=5; % Maximum iteration number
 maxOrderAR=20; % Maximum AR order for on-going activity
 maxCompNum=3; % maximum ERP component number
-searchWindowSet=[-80,80;-80,80; -60,60];  % Latency search window for each ERP component in millsecond
+searchWindowSet=[-120,120;-80,80; -60,60];  % Latency search window for each ERP component in millsecond
 searchGrid=1; % Latency search step in millsecond
 
 %
@@ -78,8 +78,8 @@ switch lower(Name)
 
         % % % % parameters of lu22go_grp
         compNumSet=[2 2 2 2 2    2 2 2 2 2   2 2 2 2 1   1];
-        waveformInitSet=[ 60  60  80  50  70     80  50  50  50  60    50  50  80 100 200  200; ...
-            140 130 150 150 170    220 200 125 150 130   150 150 200 200 399  399; ...
+        waveformInitSet=[ 60  60  80  50  50     80  50  50  50  60    50  50  80 100 200  200; ...
+            140 130 150 150 200    220 200 125 150 130   150 150 200 200 399  399; ...
             200 180 200 200 250    230 250 140 200 180   160 160 220 220 310  310; ...
             360 300 340 340 399    395 345 345 350 320   300 300 499 300 399  399];
 
