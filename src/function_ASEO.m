@@ -189,7 +189,7 @@ global maxOrderAR; % maximum AR order of on-going activity
           A=  exp(-j*freqSeq* latencyEst(trialNo,:) ).*waveformEstFreq; 
           A_tmp=A.*(inv_noiseFreq(:,trialNo) * ones(1, compNum)) ;
           x= dataFreq(:,trialNo);
-          ampEstTmp=inv(real(A'*A_tmp))*real(A_tmp'*x);
+          ampEstTmp=real(A'*A_tmp)\real(A_tmp'*x);
           ampEst(trialNo, :)= ampEstTmp.';
   end;
 
