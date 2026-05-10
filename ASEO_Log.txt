@@ -1,0 +1,20 @@
+ASEO: Analysis of Single-Trial ERP and Ongoing Activity
+
+Codes included:
+
+function_ASEO: ASEO Main function; to be called directly by user.
+functionNoiseEstFreqLDA_BIC: function called in ASEO code
+
+Main_ASEO: An example demonstrating the ASEO code and some analyses
+
+myboldify1, combinFile, drawOnging, fun_shift: functions called in Main_ASEO.
+
+Also included:
+
+Two Monkeys' LFP example datasets from experiments performed at the NIMH Laboratory of Neuropsychology during 1984-1988.  
+
+Sampling rate: 200 Hz
+Epoch Duration: [-90, 110] ms;
+Data format: #pts * #ch * # trls;
+
+For electrode locations and more information about the experiment, please refer to: Anders Ledberg et al., 2007, Large-Scale Visuomotor Integration in the Cerebral Cortex, Cerebral Cortex, 17:44-62.
