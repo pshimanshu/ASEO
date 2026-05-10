@@ -23,7 +23,7 @@ global thresholdCorr;
 LoadFlag=0; % if LoadFlag==0, run ASEO algorithm; else reload and plot previous results.
 % go_or_nogo loops over [1,0] below (1=Go, 0=Nogo)
 Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat as inputs, outputs as lu_go_grp.mat / lu_nogo_grp.mat)
-chanSet=[5];  % Channel # we want to test:   channel # 7: somm, channel #8:somv, channel
+chanSet=1:16;  % All 16 channels; channel # 7: somm, channel #8:somv
 chanNum=length(chanSet); % Number of tested channels
 
 %parameters for trial-rejection
