@@ -1,0 +1,145 @@
+# ASEO — Analysis of Single-Trial ERP and Ongoing Activity
+
+MATLAB implementation of the ASEO algorithm from:
+
+> Xu et al., "ASEO: A Method for the Simultaneous Estimation of Single-Trial Event-Related Potentials and Ongoing Brain Activities," *IEEE Trans. Biomed. Eng.*, Vol. 56, No. 1, January 2009.
+
+---
+
+## Project Structure
+
+```
+ASEO/
+├── src/                            # Core reusable functions
+│   ├── function_ASEO.m             # Main ASEO algorithm (call this)
+│   ├── functionNoiseEstFreqLDA_BIC.m  # AR model fitting (T-step)
+│   ├── fun_shift.m                 # Circular shift with zero-padding
+│   ├── fun_shift1.m                # Circular shift with edge-repeat padding
+│   ├── drawOnging.m                # Plots ongoing activity PSD
+│   ├── myboldify1.m                # Figure formatting utility
+│   └── combinFile.m                # Merges multiple data block .mat files
+│
+├── scripts/                        # Entry-point driver scripts
+│   ├── Main_ASEO.m                 # Driver for monkey LFP data (TIO, LU, GE)
+│   ├── Run_ASEO.m                  # Driver for human EEG data (CNV paradigm)
+│   └── Run_ASEO_Hong.m             # Multi-subject driver for RI2017 EEG dataset
+│
+├── data/                           # Input data
+│   ├── lu22_go_grp.mat             # Monkey LU — Go trials LFP
+│   └── lu22_nogo_grp.mat           # Monkey LU — No-Go trials LFP
+│
+└── docs/                           # Reference material
+    ├── ASEO_Xu.pdf                 # Original paper (Xu et al. 2009)
+    ├── ASEO_Log.txt                # Original development log
+    └── Notes.docx                  # Additional implementation notes
+```
+
+---
+
+## Choosing a Script
+
+| Script | Dataset | Channels | Subjects |
+|---|---|---|---|
+| `Main_ASEO.m` | Monkey LFP (TIO / LU / GE) | Multi-channel | Single session |
+| `Run_ASEO.m` | Human EEG — CNV paradigm | P3 / P4 | Single subject |
+| `Run_ASEO_Hong.m` | Human EEG — RI2017 (not included) | FCz | Multi-subject loop |
+
+To get started, use `Main_ASEO.m` with the included LU monkey dataset.
+
+---
+
+## Quickstart (Monkey LFP)
+
+1. Open MATLAB and `cd` into `scripts/`
+2. Edit the top of `Main_ASEO.m`:
+   ```matlab
+   LoadFlag    = 0;     % 0 = run algorithm, 1 = reload saved results
+   go_or_nogo  = 1;     % 1 = Go trials, 0 = No-Go trials
+   Name        = 'LU';  % Monkey name: 'TIO', 'LU', or 'GE'
+   chanSet     = [1];   % Channel indices to analyse
+   ```
+3. Run `Main_ASEO` in the MATLAB command window.
+
+Results are saved to `results/` (created automatically on first run).
+
+---
+
+## Algorithm Flow
+
+```
+Driver Script (Main_ASEO / Run_ASEO)
+│
+├── 1. Load raw LFP/EEG data  (.mat → [samples × channels × trials])
+├── 2. Set global parameters  (sampFreq, maxIterNum, searchWindowSet, ...)
+├── 3. Compute initial ERP waveforms from AERP segments (waveformInitSet)
+│
+└── 4. Call function_ASEO()
+        │
+        ├── [Init]  ampEst = 1, latencyEst = 0, noiseFreq = 1 (white)
+        │
+        ├── [Loop until convergence or maxIterNum]
+        │       │
+        │       ├── F-step  functionERPEstFreq()
+        │       │     ├── Weighted least-squares → updated ERP waveforms (eq. 12)
+        │       │     ├── IFFT peak search      → single-trial latency shifts (eq. 15)
+        │       │     └── Least-squares         → single-trial amplitudes (eq. 22)
+        │       │
+        │       ├── rejectTrial()
+        │       │     └── Flags trials where amplitude or correlation is out of range
+        │       │
+        │       └── T-step  functionNoiseEstFreqLDA_BIC()
+        │             ├── Subtract estimated ERPs → residuals
+        │             ├── Levinson-Durbin AR fitting
+        │             ├── BIC order selection (up to maxOrderAR)
+        │             └── Returns noise PSD for next F-step
+        │
+        └── [Output]  waveformEst, ampEst, latencyEst, coeffAR, rejectFlag
+```
+
+### Signal Model
+
+Each trial's signal is modelled as:
+
+```
+x_r(t) = Σ β_rn · s_n(t − τ_rn)  +  z_r(t)
+```
+
+- `s_n` — ERP component waveforms (shared across trials)
+- `β_rn` — per-trial amplitude scaling
+- `τ_rn` — per-trial latency shift
+- `z_r(t)` — ongoing brain activity, modelled as an AR process
+
+---
+
+## Key Parameters
+
+| Parameter | Default | Description |
+|---|---|---|
+| `maxIterNum` | 5 | Max F-step / T-step iterations |
+| `maxOrderAR` | 20 | AR model order ceiling (BIC picks actual order) |
+| `searchWindowSet` | `[-80,80]` ms per component | Latency search range |
+| `searchGrid` | 1 ms | Latency search step size |
+| `thresholdAmpH` | 5× mean | Trial rejection — max amplitude |
+| `thresholdAmpL` | 0.2× mean | Trial rejection — min amplitude |
+| `thresholdCorr` | 0.6 | Trial rejection — min correlation |
+
+---
+
+## Utility Functions
+
+### `fun_shift` vs `fun_shift1`
+
+Both shift a waveform in time by `step` samples, but differ at the boundary:
+
+| Function | Boundary fill | Used by |
+|---|---|---|
+| `fun_shift` | Zero-padding | `Main_ASEO.m` |
+| `fun_shift1` | Edge-value repeat | `Run_ASEO.m`, `Run_ASEO_Hong.m` |
+
+---
+
+## Data Format
+
+- Input arrays: `[nSamples × nChannels × nTrials]`
+- Sampling rate: 200 Hz (monkey LFP) / 250 Hz (human EEG)
+- Only the monkey LU dataset (`data/lu22_*.mat`) is included; human EEG datasets are not distributed with this repo.
