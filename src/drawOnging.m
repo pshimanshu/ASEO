@@ -32,7 +32,7 @@ function [ongoing]=drawOnging(coeffAR,sigma)
       plot(freqSeq, ongoing);
       xlabel('Frequency (Hz)');
       ylabel('Power spectral density');
-      title('power of ongoing activity after AESO removal of ERP');
+      title('power of ongoing activity after ASEO removal of ERP');
       grid;
       myboldify1;
       tmp=max(abs(ongoing));
