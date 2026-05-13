@@ -478,11 +478,13 @@ end
     rtCorrVec  = nan(compNum, 1);
     rtCorrPVec = nan(compNum, 1);
     if go_or_nogo == 1 && numel(acceptIndex) >= 2
-        rtAccept = rt(acceptIndex)';
+        rtAccept = rt(acceptIndex)(:);   % force column vector regardless of rt orientation
         for compNo = 1:compNum
             lat = latencyEst(acceptIndex, compNo) * sampPeri;
             if std(lat) > 0 && std(rtAccept) > 0
-                [rtCorrVec(compNo), rtCorrPVec(compNo)] = corr(lat, rtAccept, 'Type', 'Pearson');
+                [R_tmp, P_tmp] = corrcoef(lat(:), rtAccept);
+                rtCorrVec(compNo)  = R_tmp(1,2);
+                rtCorrPVec(compNo) = P_tmp(1,2);
             end
         end
     end
