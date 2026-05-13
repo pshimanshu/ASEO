@@ -13,16 +13,20 @@ ASEO/
 ├── src/                            # Core reusable functions
 │   ├── function_ASEO.m             # Main ASEO algorithm (call this)
 │   ├── functionNoiseEstFreqLDA_BIC.m  # AR model fitting (T-step)
+│   ├── generateSyntheticVSPOA.m    # Synthetic VSPOA trial generator (known ground truth)
 │   ├── fun_shift.m                 # Circular shift with zero-padding
 │   ├── fun_shift1.m                # Circular shift with edge-repeat padding
 │   ├── drawOnging.m                # Plots ongoing activity PSD
+│   ├── saveRunSummary.m            # Appends per-channel summary stats to CSV
 │   ├── myboldify1.m                # Figure formatting utility
 │   └── combinFile.m                # Merges multiple data block .mat files
 │
 ├── scripts/                        # Entry-point driver scripts
 │   ├── Main_ASEO.m                 # Driver for monkey LFP data (TIO, LU, GE)
 │   ├── Run_ASEO.m                  # Driver for human EEG data (CNV paradigm)
-│   └── Run_ASEO_Hong.m             # Multi-subject driver for RI2017 EEG dataset
+│   ├── Run_ASEO_Hong.m             # Multi-subject driver for RI2017 EEG dataset
+│   ├── Run_ASEO_Synthetic.m        # Synthetic validation — ground-truth RMSE + paper Figs 2/3/5
+│   └── Plot_Figure12.m             # Overlay AERP + ASEO components on shared axes (paper Fig 12)
 │
 ├── data/                           # Input data
 │   ├── lu22_go_grp.mat             # Monkey LU — Go trials LFP (raw block)
@@ -40,13 +44,17 @@ ASEO/
 
 ## Choosing a Script
 
-| Script | Dataset | Channels | Subjects |
-|---|---|---|---|
-| `Main_ASEO.m` | Monkey LFP (TIO / LU / GE) | Multi-channel | Single session |
-| `Run_ASEO.m` | Human EEG — CNV paradigm | P3 / P4 | Single subject |
-| `Run_ASEO_Hong.m` | Human EEG — RI2017 (not included) | FCz | Multi-subject loop |
+| Script | Dataset | Purpose |
+|---|---|---|
+| `Main_ASEO.m` | Monkey LFP (TIO / LU / GE) | Primary analysis — real data, all channels, Go + Nogo |
+| `Run_ASEO.m` | Human EEG — CNV paradigm | Single-subject human EEG analysis |
+| `Run_ASEO_Hong.m` | Human EEG — RI2017 (not included) | Multi-subject loop over RI2017 dataset |
+| `Run_ASEO_Synthetic.m` | Simulated (no external data needed) | Algorithm validation — RMSE against known ground truth |
+| `Plot_Figure12.m` | Saved ASEO results (no recomputation) | Reproduce paper Fig 12 — AERP vs. component overlay |
 
-To get started, use `Main_ASEO.m` with the included LU monkey dataset.
+To get started with real data, use `Main_ASEO.m` with the included LU monkey dataset.  
+To verify the algorithm is working correctly (e.g. after modifying core functions), use `Run_ASEO_Synthetic.m`.  
+To generate Figure 12 overlays from already-saved results, run `Plot_Figure12.m` (requires `Main_ASEO` to have run first).
 
 ---
 
@@ -70,6 +78,87 @@ results/LU/
 ```
 
 Output filenames follow the pattern `{monkey}_{condition}_grp_*`, e.g. `lu_go_grp_AERP_5.jpg`.
+
+---
+
+## Synthetic Validation
+
+`Run_ASEO_Synthetic.m` runs ASEO on simulated data where the ground-truth latency shifts and amplitudes are known, allowing quantitative accuracy measurement independent of any real dataset.
+
+**When to run it:**
+- After modifying `function_ASEO.m` or `functionNoiseEstFreqLDA_BIC.m` to check for regressions
+- To reproduce the paper's validation figures (Figs 2, 3, 5)
+- As a sanity check when porting the algorithm to a new environment
+
+**Quickstart:**
+
+```matlab
+cd scripts
+Run_ASEO_Synthetic   % runs at SNR=10 dB, saves figures to results/Synthetic/
+```
+
+The script prints acceptance rate, latency RMSE (per component, in ms), and amplitude RMSE to the command window. At SNR=10 dB you should see latency RMSE well below the 10 ms input jitter (σ).
+
+**Key flags (edit at the top of the script):**
+
+| Flag | Default | Effect |
+|---|---|---|
+| `SingleSNR` | `10` dB | SNR used for scatter plots (Figs 2 & 3) |
+| `SweepSNR` | `false` | Set `true` to sweep SNR 0–30 dB and produce Fig 5 RMSE curves (~7× slower) |
+| `RNG_SEED` | `42` | Seed for reproducibility |
+
+**Outputs saved to `results/Synthetic/`:**
+
+| File | Content |
+|---|---|
+| `Synth_LatencyScatter_SNR<N>dB.jpg` | Estimated vs. true latency scatter (paper Fig 2) |
+| `Synth_AmpScatter_SNR<N>dB.jpg` | Estimated vs. true amplitude scatter (paper Fig 3) |
+| `Synth_VarReduction_SNR<N>dB.jpg` | Variance reduction: AERP vs. ASEO residuals |
+| `Synth_RMSE_vs_SNR.jpg` | RMSE curves across SNR levels (paper Fig 5, `SweepSNR` only) |
+| `Synth_SNR_sweep.mat` | Numeric RMSE values from the SNR sweep |
+
+The simulation follows paper Example 1 (Section V-A-1): R=220 trials, T=120 samples, 200 Hz, two Gaussian ERP components, Gaussian latency jitter (σ=10 ms), log-normal amplitudes (median=1, σ=0.5), AR(2) colored noise resonant at ~10 Hz.
+
+---
+
+## Quantitative Summary Output
+
+`Main_ASEO.m` appends a row to `results/LU/{Go,Nogo}/summary_stats.csv` after each channel completes. Columns:
+
+| Column | Description |
+|---|---|
+| `chan` | Channel number |
+| `condition` | `Go` or `Nogo` |
+| `compNum` | Number of ERP components |
+| `AcceptRate_pct` | Percentage of trials accepted (0–100) |
+| `latMean_c<N>` / `latSD_c<N>` | Per-component mean ± SD latency shift (ms) |
+| `ampMean_c<N>` / `ampSD_c<N>` | Per-component mean ± SD amplitude |
+| `rtCorr_c<N>` / `rtCorrP_c<N>` | Latency–RT Pearson r and p-value (Go only) |
+| `varReduction` | Variance reduction ratio: ASEO residual / AERP residual |
+| `arOrder` | AR model order chosen by BIC |
+| `psdPeakHz` | Ongoing activity PSD peak frequency (Hz) |
+
+The file is created on the first write and appended on subsequent runs, so running multiple channels or re-running the script accumulates results in one place.
+
+---
+
+## Figure 12 — AERP vs. ASEO Component Overlay
+
+`Plot_Figure12.m` reproduces paper Figure 12 by loading the saved per-channel `.mat` result files and plotting the AERP alongside each ASEO-estimated ERP component (scaled by its mean accepted-trial amplitude) on shared axes.
+
+```matlab
+cd scripts
+Plot_Figure12   % reads results/LU/{Go,Nogo}/*.mat, saves *_Figure12_chan<N>.jpg
+```
+
+**Outputs saved alongside existing per-channel results:**
+
+| File | Content |
+|---|---|
+| `lu_go_grp_Figure12_chan<N>.jpg` | Go condition overlay — all components + AERP |
+| `lu_nogo_grp_Figure12_chan<N>.jpg` | Nogo condition overlay — all components + AERP |
+
+Each plot shows individual component waveforms, the sum of all ASEO components, and the original AERP in different colours for direct visual comparison.
 
 ---
 
