@@ -259,7 +259,12 @@ end
     %-------------------------------------------
     % plot the variances of residual signals after removing ERPs
     figure(figNum)
-    var_ori=mean( dataChanGo.*dataChanGo, 2) - mean(dataChanGo,2).^2 ; % variance of residual signal after removing AERP
+    if go_or_nogo==1
+        dataChan = dataChanGo;
+    else
+        dataChan = dataChanNogo;
+    end
+    var_ori=mean( dataChan.*dataChan, 2) - mean(dataChan,2).^2 ; % variance of residual signal after removing AERP
     temp=real(residualSignalTime(1:sampNum,acceptIndex));   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusSamp, var_ori, '--b', (1:sampPeri:(sampNum*sampPeri))-preStimulusSamp,var_red, '-r');
     ylabel('Power');
@@ -360,7 +365,7 @@ end
         otherwise
             legend('Comp. 1', 'Comp. 2', 'Comp. 3');
     end;
-    temp=mean(ampEst); temp=max(temp);
+    temp=max(abs(mean(ampEst)));
     if isnan(temp) || temp==0, temp=1; end
     axis([-1*preStimulusTime ((sampNum-5)*sampPeri-preStimulusTime) -1*temp  1.2*temp])  ;
     condStr = 'Nogo'; if go_or_nogo==1, condStr = 'Go'; end
