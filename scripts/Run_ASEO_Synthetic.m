@@ -90,9 +90,17 @@ amp_true_acc = ampTrue(acceptIdx,:);
 amp_est_acc  = ampEst (acceptIdx,:);
 rmse_amp     = sqrt(mean((amp_est_acc - amp_true_acc).^2, 1));
 
-% Pearson correlation: distinguishes scale/offset bias from pure noise
-r_lat = diag(corr(lat_true_ms, lat_est_ms));
-r_amp = diag(corr(amp_true_acc, amp_est_acc));
+% Pearson correlation column-wise (no toolbox required)
+r_lat = zeros(2,1);  r_amp = zeros(2,1);
+for c = 1:2
+    a = lat_true_ms(:,c)  - mean(lat_true_ms(:,c));
+    b = lat_est_ms(:,c)   - mean(lat_est_ms(:,c));
+    r_lat(c) = (a'*b) / (norm(a)*norm(b));
+
+    a = amp_true_acc(:,c) - mean(amp_true_acc(:,c));
+    b = amp_est_acc(:,c)  - mean(amp_est_acc(:,c));
+    r_amp(c) = (a'*b) / (norm(a)*norm(b));
+end
 
 fprintf('Latency  RMSE — Comp1: %.2f ms,  Comp2: %.2f ms  (input sigma = 10 ms; want RMSE << 10)\n', rmse_lat(1), rmse_lat(2));
 fprintf('         corr — Comp1: r=%.3f,    Comp2: r=%.3f\n', r_lat(1), r_lat(2));
