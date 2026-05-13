@@ -264,9 +264,12 @@ end
     else
         dataChan = dataChanNogo;
     end
-    var_ori=mean( dataChan.*dataChan, 2) - mean(dataChan,2).^2 ; % variance of residual signal after removing AERP
+    var_ori=mean( dataChan.*dataChan, 2) - mean(dataChan,2).^2 ; % variance of residual signal after removing AERP (all trials, for plot)
     temp=real(residualSignalTime(1:sampNum,acceptIndex));   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
-    varReductionRatio = sum(var_red) / sum(var_ori);
+    % Use accepted trials only for both sides so the ratio is like-for-like
+    dataChanAccept = dataChan(:, acceptIndex);
+    var_ori_accept = mean(dataChanAccept.*dataChanAccept, 2) - mean(dataChanAccept, 2).^2;
+    varReductionRatio = sum(var_red) / sum(var_ori_accept);
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusSamp, var_ori, '--b', (1:sampPeri:(sampNum*sampPeri))-preStimulusSamp,var_red, '-r');
     ylabel('Power');
     xlabel('Time (ms)');
@@ -459,21 +462,28 @@ end
     print('-djpeg',[dataPath dataName '_ASEO_Ongoing_chan' '_chan' num2str(chanNo) '.jpg']);
     hold on;
 
-    % Compute PSD peak frequency from ongoing activity
+    % Compute PSD peak frequency from ongoing activity (restrict to 0..sampFreq/4,
+    % matching the axis used in drawOnging; linspace endpoint excluded to avoid
+    % the periodic duplicate at sampFreq)
     freqSampNumOngoing = 2.^(ceil(log2(sampNum)))*4;
-    freqSeqOngoing = linspace(0, sampFreq, freqSampNumOngoing).';
+    freqSeqOngoing = (0:(freqSampNumOngoing-1)).' * sampFreq / freqSampNumOngoing;
+    searchBand = freqSeqOngoing <= sampFreq/4;
     meanOngoing = mean(ongoing, 2);
-    [~, peakIdx] = max(meanOngoing);
-    psdPeakFreq = freqSeqOngoing(peakIdx);
+    [~, peakIdx] = max(meanOngoing(searchBand));
+    bandFreqs = freqSeqOngoing(searchBand);
+    psdPeakFreq = bandFreqs(peakIdx);
 
     % Compute RT correlation for Go condition (Nogo has no RT)
     arOrder = size(coeffAR, 1);
     rtCorrVec  = nan(compNum, 1);
     rtCorrPVec = nan(compNum, 1);
-    if go_or_nogo == 1
+    if go_or_nogo == 1 && numel(acceptIndex) >= 2
+        rtAccept = rt(acceptIndex)';
         for compNo = 1:compNum
             lat = latencyEst(acceptIndex, compNo) * sampPeri;
-            [rtCorrVec(compNo), rtCorrPVec(compNo)] = corr(lat, rt(acceptIndex)', 'Type', 'Pearson');
+            if std(lat) > 0 && std(rtAccept) > 0
+                [rtCorrVec(compNo), rtCorrPVec(compNo)] = corr(lat, rtAccept, 'Type', 'Pearson');
+            end
         end
     end
 
