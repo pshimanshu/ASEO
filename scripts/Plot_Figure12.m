@@ -47,7 +47,7 @@ for ci = 1:numel(conditions)
         % Variables in workspace: ampEst, latencyEst, waveformEst,
         %   rejectFlag, compNum, dataAERPGo, dataAERPNogo, chanNo, sampNum
 
-        tVec = (1:sampPeri:(sampNum * sampPeri)) - preStimulusTime;
+        tVec = (0:sampNum-1) * sampPeri - preStimulusTime;
 
         % Bug fix: dataAERPGo/Nogo is [sampNum x chanNum]; column index
         % equals chanNo (since chanSet=1:16 so kkk==chanNo).
@@ -58,6 +58,10 @@ for ci = 1:numel(conditions)
         end
 
         acceptIndex = find(~rejectFlag);
+        if isempty(acceptIndex)
+            warning('Chan %d %s: all trials rejected — skipping.', chanNo, cond.label);
+            continue;
+        end
 
         % Normalize AERP to unit peak so shape is on [-1, +1]
         aerpPeak = max(abs(aerp_raw));

@@ -91,8 +91,12 @@ amp_est_acc  = ampEst (acceptIdx,:);
 rmse_amp     = sqrt(mean((amp_est_acc - amp_true_acc).^2, 1));
 
 % Pearson correlation: distinguishes scale/offset bias from pure noise
-r_lat = diag(corr(lat_true_ms, lat_est_ms));
-r_amp = diag(corr(amp_true_acc, amp_est_acc));
+% Use corrcoef (base MATLAB) rather than corr (Statistics Toolbox)
+r_lat = zeros(2, 1);  r_amp = zeros(2, 1);
+for c = 1:2
+    tmp = corrcoef(lat_true_ms(:,c), lat_est_ms(:,c));   r_lat(c) = tmp(1,2);
+    tmp = corrcoef(amp_true_acc(:,c), amp_est_acc(:,c));  r_amp(c) = tmp(1,2);
+end
 
 fprintf('Latency  RMSE — Comp1: %.2f ms,  Comp2: %.2f ms  (input sigma = 10 ms; want RMSE << 10)\n', rmse_lat(1), rmse_lat(2));
 fprintf('         corr — Comp1: r=%.3f,    Comp2: r=%.3f\n', r_lat(1), r_lat(2));
@@ -134,9 +138,10 @@ print('-djpeg', fullfile(outDir, sprintf('Synth_AmpScatter_SNR%ddB.jpg', SingleS
 
 % ---- Variance reduction check -----------------------------------------
 t_ms = (1:sampNum)' * sampPeri - sampPeri;
-var_ori  = var(data, 0, 2);
+% Use accepted trials only for both sides so the ratio is like-for-like
+var_ori  = var(data(:, acceptIdx), 0, 2);
 var_res  = var(real(residualSignalTime(1:sampNum, acceptIdx)), 0, 2);
-varRatio = sum(var_res) / sum(var(data(:, acceptIdx), 0, 2));
+varRatio = sum(var_res) / sum(var_ori);
 snr_lin_actual = 10^(SingleSNR/10);
 varRatio_ideal = 1 / (1 + snr_lin_actual);   % floor for a perfect estimator at this SNR
 fprintf('Variance reduction ratio: %.3f  (ideal floor at SNR=%ddB: %.3f;  paper real-data: ~0.29–0.30)\n', ...

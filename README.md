@@ -130,7 +130,7 @@ The simulation follows paper Example 1 (Section V-A-1): R=220 trials, T=120 samp
 | `chan` | Channel number |
 | `condition` | `Go` or `Nogo` |
 | `compNum` | Number of ERP components |
-| `acceptRate` | Fraction of trials accepted (0–1) |
+| `AcceptRate_pct` | Percentage of trials accepted (0–100) |
 | `latMean_c<N>` / `latSD_c<N>` | Per-component mean ± SD latency shift (ms) |
 | `ampMean_c<N>` / `ampSD_c<N>` | Per-component mean ± SD amplitude |
 | `rtCorr_c<N>` / `rtCorrP_c<N>` | Latency–RT Pearson r and p-value (Go only) |
