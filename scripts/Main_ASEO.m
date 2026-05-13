@@ -23,7 +23,7 @@ global thresholdCorr;
 LoadFlag=0; % if LoadFlag==0, run ASEO algorithm; else reload and plot previous results.
 % go_or_nogo loops over [1,0] below (1=Go, 0=Nogo)
 Name='LU'; % Monkey Name — only LU data ships with this repo (lu22_go_grp.mat / lu22_nogo_grp.mat as inputs, outputs as lu_go_grp.mat / lu_nogo_grp.mat)
-chanSet=[5];  % Channel # we want to test:   channel # 7: somm, channel #8:somv, channel
+chanSet=1:16;  % All 16 channels; channel # 7: somm, channel #8:somv
 chanNum=length(chanSet); % Number of tested channels
 
 %parameters for trial-rejection
@@ -34,7 +34,7 @@ thresholdCorr =0.6;  %minimum correlation with the original data
 maxIterNum=5; % Maximum iteration number
 maxOrderAR=20; % Maximum AR order for on-going activity
 maxCompNum=3; % maximum ERP component number
-searchWindowSet=[-80,80;-80,80; -60,60];  % Latency search window for each ERP component in millsecond
+searchWindowSet=[-120,120;-80,80; -60,60];  % Latency search window for each ERP component in millsecond
 searchGrid=1; % Latency search step in millsecond
 
 %
@@ -78,8 +78,8 @@ switch lower(Name)
 
         % % % % parameters of lu22go_grp
         compNumSet=[2 2 2 2 2    2 2 2 2 2   2 2 2 2 1   1];
-        waveformInitSet=[ 60  60  80  50  70     80  50  50  50  60    50  50  80 100 200  200; ...
-            140 130 150 150 170    220 200 125 150 130   150 150 200 200 399  399; ...
+        waveformInitSet=[ 60  60  80  50  50     80  50  50  50  60    50  50  80 100 200  200; ...
+            140 130 150 150 200    220 200 125 150 130   150 150 200 200 399  399; ...
             200 180 200 200 250    230 250 140 200 180   160 160 220 220 310  310; ...
             360 300 340 340 399    395 345 345 350 320   300 300 499 300 399  399];
 
@@ -259,8 +259,13 @@ end
     %-------------------------------------------
     % plot the variances of residual signals after removing ERPs
     figure(figNum)
-    var_ori=mean( dataChanGo.*dataChanGo, 2) - mean(dataChanGo,2).^2 ; % variance of residual signal after removing AERP
-    temp=residualSignalTime(1:sampNum,acceptIndex);   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
+    if go_or_nogo==1
+        dataChan = dataChanGo;
+    else
+        dataChan = dataChanNogo;
+    end
+    var_ori=mean( dataChan.*dataChan, 2) - mean(dataChan,2).^2 ; % variance of residual signal after removing AERP
+    temp=real(residualSignalTime(1:sampNum,acceptIndex));   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusSamp, var_ori, '--b', (1:sampPeri:(sampNum*sampPeri))-preStimulusSamp,var_red, '-r');
     ylabel('Power');
     xlabel('Time (ms)');
@@ -304,7 +309,7 @@ end
     residualAERP=real(mean(residualSignalTime(1:sampNum,:),2));
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, AERP,'-b'); %
     hold on;
-    plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, RestoreAERP,'--r');
+    plot((1:sampPeri:(sampNum*sampPeri))-preStimulusTime, real(RestoreAERP),'--r');
     hold on;
     legend('AERP', 'Recovered AERP')
     ylabel('Amplitude (uV)');
@@ -360,12 +365,16 @@ end
         otherwise
             legend('Comp. 1', 'Comp. 2', 'Comp. 3');
     end;
-    temp=mean(ampEst); temp=max(temp);
+    temp=max(abs(mean(ampEst)));
+    if isnan(temp) || temp==0, temp=1; end
     axis([-1*preStimulusTime ((sampNum-5)*sampPeri-preStimulusTime) -1*temp  1.2*temp])  ;
-    disp(['reject ratio: ' num2str(length(rejectIndex)/length(rejectFlag))]);
+    condStr = 'Nogo'; if go_or_nogo==1, condStr = 'Go'; end
+    nRej = length(rejectIndex); nTot = length(rejectFlag);
+    disp(['[Chan ' num2str(chanNo) ' | ' condStr ' | ch ' num2str(kkk) '/' num2str(chanNum) '] ' ...
+          'reject ratio: ' num2str(nRej) '/' num2str(nTot) ' (' num2str(100*nRej/nTot,'%.1f') '%)']);
     ylabel('Amplitude (uV)');
     xlabel('Time (ms)');
-    title(['reject ratio: ' num2str(length(rejectIndex)/length(rejectFlag))]);
+    title(['Chan ' num2str(chanNo) ' ' condStr ' — reject ' num2str(nRej) '/' num2str(nTot)]);
     myboldify1;
     print('-djpeg',[dataPath dataName '_ASEO_ERP_chan' num2str(chanNo)  '.jpg']);
 
