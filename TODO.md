@@ -31,15 +31,15 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
 
 ## Step 3 — A: Validate Algorithm with Synthetic Data (Ground Truth)
 
-- [ ] Implement `generateSyntheticVSPOA.m` — simulate trials per paper Example 1 (Section V-A-1):
+- [x] Implement `generateSyntheticVSPOA.m` — simulate trials per paper Example 1 (Section V-A-1):
   - R = 220 trials, T = 120 samples, 200 Hz sampling rate
   - 2 ERP components with Gaussian latency shifts (μ=0, σ=10 ms)
   - Log-normal amplitude scaling (median=1, shape=0.5)
-  - Additive AR ongoing activity at varying SNR
-- [ ] Run `function_ASEO` on synthetic data with known ground-truth latencies and amplitudes
-- [ ] Compute RMSE: `sqrt(mean((latencyEst - latencyTrue).^2))` and same for amplitude
-- [ ] Reproduce paper Figure 2 (latency scatter: estimated vs. true) and Figure 3 (amplitude scatter)
-- [ ] Optionally sweep SNR (0–30 dB) and reproduce Figure 5 RMSE curves
+  - Additive AR(2) ongoing activity at varying SNR
+- [x] Run `function_ASEO` on synthetic data with known ground-truth latencies and amplitudes
+- [x] Compute RMSE: `sqrt(mean((latencyEst - latencyTrue).^2))` and same for amplitude
+- [x] Reproduce paper Figure 2 (latency scatter: estimated vs. true) and Figure 3 (amplitude scatter)
+- [x] Optionally sweep SNR (0–30 dB) and reproduce Figure 5 RMSE curves (set `SweepSNR=true`)
 
 ---
 
