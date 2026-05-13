@@ -45,11 +45,11 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
 
 ## Step 4 — D: Reproduce Paper Figure 12 (AERP vs. Component Overlay)
 
-- [ ] Overlay the ASEO-estimated component waveforms on the same axes as the original AERP
-  - Currently `lu_go_grp_AERP_5.jpg` and `lu_go_grp_ASEO_ERP_chan5.jpg` are separate plots
-  - Paper Figure 12 shows them together for direct visual comparison
-- [ ] Add axis labels consistent with paper (normalized amplitude or µV, time in ms)
-- [ ] Produce for both Go and Nogo conditions
+- [x] Overlay the ASEO-estimated component waveforms on the same axes as the original AERP
+  - `scripts/Plot_Figure12.m` loads saved ASEO results and overlays per-component waveforms + AERP on shared axes
+  - Saves `*_Figure12_chan<N>.jpg` alongside existing per-channel results
+- [x] Add axis labels consistent with paper (normalized amplitude or µV, time in ms)
+- [x] Produce for both Go and Nogo conditions
 
 ---
 
