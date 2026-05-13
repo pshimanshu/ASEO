@@ -4,6 +4,10 @@
 % overlays the ASEO-estimated ERP component waveforms on the same axes as
 % the original AERP, for both Go and Nogo conditions and all 16 channels.
 %
+% Waveforms are normalized to their own peak absolute amplitude so that
+% shape can be compared directly on a common [-1, +1] scale.  This matches
+% paper Figure 12 ("normalized amplitude" axis).
+%
 % Usage: run this script after Main_ASEO has saved results to results/LU/.
 
 close all;
@@ -17,14 +21,14 @@ preStimulusTime = 100;   % ms
 dataNameGo   = 'lu_go_grp';
 dataNameNogo = 'lu_nogo_grp';
 
-conditions = struct('name', {dataNameGo,  dataNameNogo}, ...
-                    'label', {'Go',        'Nogo'}, ...
-                    'flag',  {1,            0});
+conditions = struct('name',  {dataNameGo,  dataNameNogo}, ...
+                    'label', {'Go',         'Nogo'}, ...
+                    'flag',  {1,             0});
 
 for ci = 1:numel(conditions)
     cond     = conditions(ci);
     condPath = fullfile(scriptDir, '..', 'results', 'LU', cond.label, filesep);
-    outPath  = fullfile(scriptDir, '..', 'results', 'LU', cond.label, filesep);
+    outPath  = condPath;
 
     if cond.flag == 1
         suffix = '_Go.mat';
@@ -40,54 +44,64 @@ for ci = 1:numel(conditions)
 
     for fi = 1:numel(matFiles)
         load(fullfile(condPath, matFiles(fi).name));
-        % Variables now in workspace: ampEst, latencyEst, waveformEst,
+        % Variables in workspace: ampEst, latencyEst, waveformEst,
         %   rejectFlag, compNum, dataAERPGo, dataAERPNogo, chanNo, sampNum
 
         tVec = (1:sampPeri:(sampNum * sampPeri)) - preStimulusTime;
 
-        % AERP for this condition
+        % Bug fix: dataAERPGo/Nogo is [sampNum x chanNum]; column index
+        % equals chanNo (since chanSet=1:16 so kkk==chanNo).
         if cond.flag == 1
-            aerp = dataAERPGo(:, 1);
+            aerp_raw = dataAERPGo(:, chanNo);
         else
-            aerp = dataAERPNogo(:, 1);
+            aerp_raw = dataAERPNogo(:, chanNo);
         end
 
         acceptIndex = find(~rejectFlag);
 
-        % Sum of scaled ASEO component waveforms (using mean amplitude over
-        % accepted trials — same scaling used in the current per-component
-        % subplot in Main_ASEO)
-        aseoSum = zeros(sampNum, 1);
-        compColors = {'-r', '--m', '-.k'};
+        % Normalize AERP to unit peak so shape is on [-1, +1]
+        aerpPeak = max(abs(aerp_raw));
+        if aerpPeak == 0 || isnan(aerpPeak), aerpPeak = 1; end
+        aerp_norm = aerp_raw / aerpPeak;
+
+        % Build normalized ASEO component waveforms
+        compColors  = {'-r', '--m', '-.k'};
         compHandles = gobjects(compNum, 1);
+        aseoSum_raw = zeros(sampNum, 1);
+
+        for compNo = 1:compNum
+            meanAmp = mean(ampEst(acceptIndex, compNo));
+            wave    = real(waveformEst(1:sampNum, compNo)) * meanAmp;
+            aseoSum_raw = aseoSum_raw + wave;
+        end
 
         fig = figure('Visible', 'off');
         hold on;
 
-        % Individual components
+        % Plot individual components (each normalized to its own peak)
         for compNo = 1:compNum
-            meanAmp = mean(ampEst(acceptIndex, compNo));
-            wave    = real(waveformEst(1:sampNum, compNo)) * meanAmp;
-            aseoSum = aseoSum + wave;
-            h = plot(tVec, wave, compColors{min(compNo, end)}, 'LineWidth', 1.5);
+            meanAmp  = mean(ampEst(acceptIndex, compNo));
+            wave_raw = real(waveformEst(1:sampNum, compNo)) * meanAmp;
+            wavePeak = max(abs(wave_raw));
+            if wavePeak == 0 || isnan(wavePeak), wavePeak = 1; end
+            h = plot(tVec, wave_raw / wavePeak, compColors{min(compNo, numel(compColors))}, ...
+                     'LineWidth', 1.5);
             compHandles(compNo) = h;
         end
 
-        % AERP and total reconstructed AERP
-        hAERP  = plot(tVec, aerp,    '-b',  'LineWidth', 2);
-        hTotal = plot(tVec, aseoSum, '--g', 'LineWidth', 1.5);
+        % ASEO total: normalize the summed waveform to its own peak
+        totalPeak = max(abs(aseoSum_raw));
+        if totalPeak == 0 || isnan(totalPeak), totalPeak = 1; end
+        hTotal = plot(tVec, aseoSum_raw / totalPeak, '--g', 'LineWidth', 1.5);
 
-        % Axis limits
-        yAll = [aerp; aseoSum];
-        yMin = 1.2 * min(yAll);
-        yMax = 1.2 * max(yAll);
-        if yMin == yMax, yMax = yMin + 1; end
+        % AERP last so it sits on top
+        hAERP = plot(tVec, aerp_norm, '-b', 'LineWidth', 2);
+
+        ylim([-1.3, 1.3]);
         xlim([tVec(1), tVec(end)]);
-        ylim([yMin, yMax]);
 
-        % Labels and legend
         xlabel('Time (ms)', 'FontSize', 12);
-        ylabel('Amplitude (\muV)', 'FontSize', 12);
+        ylabel('Normalized amplitude', 'FontSize', 12);
         title(sprintf('Chan %d %s — AERP vs. ASEO Components (Fig. 12)', ...
               chanNo, cond.label), 'FontSize', 12);
 
@@ -95,9 +109,9 @@ for ci = 1:numel(conditions)
         for compNo = 1:compNum
             legendLabels{compNo} = sprintf('ASEO Comp. %d', compNo);
         end
-        legendLabels{compNum + 1} = 'AERP';
-        legendLabels{compNum + 2} = 'ASEO total';
-        legend([compHandles; hAERP; hTotal], legendLabels, 'Location', 'best');
+        legendLabels{compNum + 1} = 'ASEO total';
+        legendLabels{compNum + 2} = 'AERP';
+        legend([compHandles; hTotal; hAERP], legendLabels, 'Location', 'best');
 
         grid on;
         myboldify1;
