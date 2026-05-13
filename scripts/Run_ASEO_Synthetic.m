@@ -16,6 +16,8 @@ if ~exist(outDir, 'dir'), mkdir(outDir); end
 SweepSNR  = false;   % true => reproduce Fig 5 RMSE vs SNR curves (~7 runs)
 SingleSNR = 10;      % dB used for scatter plots (Figs 2 & 3)
 RNG_SEED  = 42;
+UseGTInit = false;   % true => init with ground-truth waveforms instead of AERP
+                     %         (diagnostic: isolates init quality from noise-model issues)
 
 % ---- ASEO global parameters -------------------------------------------
 global sampFreq sampPeri sampNum freqSampNum
@@ -25,7 +27,7 @@ global thresholdAmpH thresholdAmpL thresholdCorr
 sampFreq = 200;
 sampPeri = 1000 / sampFreq;   % 5 ms
 sampNum  = 120;
-maxIterNum  = 10;
+maxIterNum  = 20;   % 10 was too few for convergence with colored noise
 maxOrderAR  = 20;
 searchGrid  = 1;   % ms
 
@@ -44,16 +46,23 @@ fprintf('Running ASEO on synthetic data at SNR = %d dB ...\n', SingleSNR);
 [data, latencyTrue, ampTrue, waveformTrue] = ...
     generateSyntheticVSPOA(SingleSNR, 'seed', RNG_SEED);
 
-aerp = mean(data, 2);
 comp_centres_ms = [100, 300];
 half_win_ms     = 60;
-waveformInit    = zeros(sampNum, 2);
-for c = 1:2
-    t1 = max(1,       round((comp_centres_ms(c) - half_win_ms) / sampPeri) + 1);
-    t2 = min(sampNum, round((comp_centres_ms(c) + half_win_ms) / sampPeri) + 1);
-    seg  = aerp(t1:t2);
-    peak = max(abs(seg));  if peak == 0, peak = 1; end
-    waveformInit(t1:t2, c) = seg / peak;
+if UseGTInit
+    % Use ground-truth waveforms: bypasses AERP quality entirely.
+    % If RMSE improves sharply here vs. AERP init, init quality is a bottleneck.
+    waveformInit = waveformTrue;
+    fprintf('  (using ground-truth waveform initialisation)\n');
+else
+    aerp         = mean(data, 2);
+    waveformInit = zeros(sampNum, 2);
+    for c = 1:2
+        t1 = max(1,       round((comp_centres_ms(c) - half_win_ms) / sampPeri) + 1);
+        t2 = min(sampNum, round((comp_centres_ms(c) + half_win_ms) / sampPeri) + 1);
+        seg  = aerp(t1:t2);
+        peak = max(abs(seg));  if peak == 0, peak = 1; end
+        waveformInit(t1:t2, c) = seg / peak;
+    end
 end
 
 zeroPadNum  = ceil(2 * max(abs(searchWindowSet(:))) / sampPeri);
@@ -81,8 +90,14 @@ amp_true_acc = ampTrue(acceptIdx,:);
 amp_est_acc  = ampEst (acceptIdx,:);
 rmse_amp     = sqrt(mean((amp_est_acc - amp_true_acc).^2, 1));
 
-fprintf('Latency RMSE  — Comp1: %.2f ms,  Comp2: %.2f ms\n', rmse_lat(1), rmse_lat(2));
-fprintf('Amplitude RMSE — Comp1: %.3f,     Comp2: %.3f\n',   rmse_amp(1), rmse_amp(2));
+% Pearson correlation: distinguishes scale/offset bias from pure noise
+r_lat = diag(corr(lat_true_ms, lat_est_ms));
+r_amp = diag(corr(amp_true_acc, amp_est_acc));
+
+fprintf('Latency  RMSE — Comp1: %.2f ms,  Comp2: %.2f ms  (input sigma = 10 ms; want RMSE << 10)\n', rmse_lat(1), rmse_lat(2));
+fprintf('         corr — Comp1: r=%.3f,    Comp2: r=%.3f\n', r_lat(1), r_lat(2));
+fprintf('Amplitude RMSE — Comp1: %.3f,     Comp2: %.3f  (true SD~0.60; want RMSE << 0.60)\n', rmse_amp(1), rmse_amp(2));
+fprintf('         corr — Comp1: r=%.3f,    Comp2: r=%.3f\n', r_amp(1), r_amp(2));
 
 % ---- Figure 2: latency scatter (estimated vs. true) -------------------
 figure(2); clf;
@@ -122,7 +137,10 @@ t_ms = (1:sampNum)' * sampPeri - sampPeri;
 var_ori  = var(data, 0, 2);
 var_res  = var(real(residualSignalTime(1:sampNum, acceptIdx)), 0, 2);
 varRatio = sum(var_res) / sum(var(data(:, acceptIdx), 0, 2));
-fprintf('Variance reduction ratio: %.3f  (paper reports ~0.29–0.30)\n', varRatio);
+snr_lin_actual = 10^(SingleSNR/10);
+varRatio_ideal = 1 / (1 + snr_lin_actual);   % floor for a perfect estimator at this SNR
+fprintf('Variance reduction ratio: %.3f  (ideal floor at SNR=%ddB: %.3f;  paper real-data: ~0.29–0.30)\n', ...
+    varRatio, SingleSNR, varRatio_ideal);
 
 figure(4); clf;
 plot(t_ms, var_ori, '--b', t_ms, var_res, '-r');

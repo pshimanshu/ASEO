@@ -56,7 +56,11 @@ end
 
 % ---- AR(2) ongoing activity resonant near 10 Hz ------------------------
 % AR(2) poles at radius r, angle 2*pi*f0/fs => denominator [1, -2r*cos(theta), r^2]
-r_pole = 0.95;
+% r=0.70 gives a broad ~27 Hz -3dB bandwidth, which is realistic for LFP and avoids
+% catastrophic mismatch with function_ASEO's flat initial noise PSD assumption.
+% (r=0.95 was too narrow: ~3 Hz bandwidth, causing the F-step to mis-attribute the
+% noise spike as ERP signal before the T-step could correct it.)
+r_pole = 0.70;
 f0_hz  = 10;
 ar_denom = [1, -2*r_pole*cos(2*pi*f0_hz/fs), r_pole^2];
 
