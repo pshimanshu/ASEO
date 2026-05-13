@@ -13,7 +13,7 @@ outDir = fullfile(scriptDir, '..', 'results', 'Synthetic');
 if ~exist(outDir, 'dir'), mkdir(outDir); end
 
 % ---- user flags --------------------------------------------------------
-SweepSNR  = false;   % true => reproduce Fig 5 RMSE vs SNR curves (~7 runs)
+SweepSNR  = true;    % true => reproduce Fig 5 RMSE vs SNR curves (~7 runs)
 SingleSNR = 10;      % dB used for scatter plots (Figs 2 & 3)
 RNG_SEED  = 42;
 UseGTInit = false;   % true => init with ground-truth waveforms instead of AERP
