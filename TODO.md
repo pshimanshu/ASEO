@@ -11,7 +11,7 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
   - Widened `searchWindowSet` Comp 1 to ±120 ms (was ±80 ms)
   - Extended LU ch5 Comp 1 `waveformInitSet` window: start 70→50 ms, end 170→200 ms
 - [x] Run analysis on all 16 channels (`chanSet=1:16`)
-- [ ] Run both Go and Nogo conditions across all channels (already looped; verify output after running)
+- [x] Run both Go and Nogo conditions across all channels (already looped; verify output after running)
 
 ---
 
