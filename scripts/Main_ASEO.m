@@ -478,7 +478,7 @@ end
     rtCorrVec  = nan(compNum, 1);
     rtCorrPVec = nan(compNum, 1);
     if go_or_nogo == 1 && numel(acceptIndex) >= 2
-        rtAccept = rt(acceptIndex)(:);   % force column vector regardless of rt orientation
+        rtAccept = rt(acceptIndex);  rtAccept = rtAccept(:);   % force column vector
         for compNo = 1:compNum
             lat = latencyEst(acceptIndex, compNo) * sampPeri;
             if std(lat) > 0 && std(rtAccept) > 0
