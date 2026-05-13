@@ -36,7 +36,7 @@ searchWindowSet = [-40, 40; -40, 40];   % [compNum x 2] in ms
 
 thresholdAmpH = 5;
 thresholdAmpL = 0.2;
-thresholdCorr = 0.6;
+thresholdCorr = 0.5;
 
 % ======================================================================
 % Single-SNR run — scatter plots (paper Figs 2 & 3)

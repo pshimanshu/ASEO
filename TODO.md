@@ -17,7 +17,7 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
 
 ## Step 2 — C: Add Quantitative Reporting
 
-- [ ] Save per-run summary statistics to a `.txt` or `.csv` file:
+- [x] Save per-run summary statistics to a `.txt` or `.csv` file:
   - Trial acceptance rate (accepted / total)
   - Per-component mean latency ± SD
   - Per-component mean amplitude ± SD
@@ -25,7 +25,7 @@ Ordered by priority. Steps requiring additional monkey datasets (LU30, GE, TIO) 
   - Variance reduction ratio (ASEO vs. AERP) — paper reports ~0.29–0.30
   - AR model order selected by BIC
   - PSD peak frequency of ongoing activity
-- [ ] These values are already computed; they just need to be saved/printed
+- [x] These values are already computed; they just need to be saved/printed
 
 ---
 
