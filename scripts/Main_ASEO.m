@@ -266,6 +266,7 @@ end
     end
     var_ori=mean( dataChan.*dataChan, 2) - mean(dataChan,2).^2 ; % variance of residual signal after removing AERP
     temp=real(residualSignalTime(1:sampNum,acceptIndex));   var_red = mean(temp.*temp,2) - mean(temp,2).^2; % variance of residual signal after removing AERP
+    varReductionRatio = sum(var_red) / sum(var_ori);
     plot((1:sampPeri:(sampNum*sampPeri))-preStimulusSamp, var_ori, '--b', (1:sampPeri:(sampNum*sampPeri))-preStimulusSamp,var_red, '-r');
     ylabel('Power');
     xlabel('Time (ms)');
@@ -457,6 +458,30 @@ end
     [ongoing]=drawOnging(mean(coeffAR,2),mean(sigma));
     print('-djpeg',[dataPath dataName '_ASEO_Ongoing_chan' '_chan' num2str(chanNo) '.jpg']);
     hold on;
+
+    % Compute PSD peak frequency from ongoing activity
+    freqSampNumOngoing = 2.^(ceil(log2(sampNum)))*4;
+    freqSeqOngoing = linspace(0, sampFreq, freqSampNumOngoing).';
+    meanOngoing = mean(ongoing, 2);
+    [~, peakIdx] = max(meanOngoing);
+    psdPeakFreq = freqSeqOngoing(peakIdx);
+
+    % Compute RT correlation for Go condition (Nogo has no RT)
+    arOrder = size(coeffAR, 1);
+    rtCorrVec  = nan(compNum, 1);
+    rtCorrPVec = nan(compNum, 1);
+    if go_or_nogo == 1
+        for compNo = 1:compNum
+            lat = latencyEst(acceptIndex, compNo) * sampPeri;
+            [rtCorrVec(compNo), rtCorrPVec(compNo)] = corr(lat, rt(acceptIndex)', 'Type', 'Pearson');
+        end
+    end
+
+    % Save summary statistics to CSV
+    summaryCSV = [dataPath 'summary_stats.csv'];
+    saveRunSummary(summaryCSV, chanNo, condStr, compNum, rejectFlag, ...
+        latencyEst, ampEst, sampPeri, varReductionRatio, arOrder, psdPeakFreq, ...
+        rtCorrVec, rtCorrPVec);
 
  end; % end for kkk
 end; % end for go_or_nogo
