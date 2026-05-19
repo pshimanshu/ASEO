@@ -133,6 +133,8 @@ else
     dataPath = fullfile(scriptDir, '..', 'results', 'LU', 'Nogo', filesep);
 end
 if ~exist(dataPath, 'dir'), mkdir(dataPath); end
+summaryCSV = fullfile(dataPath, 'summary_stats.csv');
+if exist(summaryCSV, 'file'), delete(summaryCSV); end  % start fresh each run
 figNum=0;
 for kkk=1:chanNum
     chanNo=chanSet(kkk); % Tested channel #
@@ -509,8 +511,7 @@ end
         end
     end
 
-    % Save summary statistics to CSV
-    summaryCSV = [dataPath 'summary_stats.csv'];
+    % Save summary statistics to CSV (summaryCSV set at top of go_or_nogo loop)
     saveRunSummary(summaryCSV, chanNo, condStr, compNum, rejectFlag, ...
         latencyEst, ampEst, sampPeri, varReductionRatio, arOrder, psdPeakFreq, ...
         rtCorrVec, rtCorrPVec);
