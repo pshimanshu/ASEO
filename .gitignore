@@ -5,3 +5,6 @@ results/
 data/lu_go_grp.mat
 data/lu_nogo_grp.mat
 .DS_Store
+helpers/
+PROJECT_OVERVIEW.md
+reports/figures/

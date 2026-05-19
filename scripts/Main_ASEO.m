@@ -217,16 +217,35 @@ for kkk=1:chanNum
             dataFreqGo=fft(dataChanGo, freqSampNum);    % Fourier transform of the signal
             [ampEst, latencyEst, waveformEst,coeffAR,noiseFreq,sigma,residualSignalTime, rejectFlag,errEst]=function_ASEO(dataFreqGo, waveformInitFreq);
 
-            % save the results
+            % Compute single-trial ERP reconstructions for Python report visualisation
+            singleTrialERP = zeros(sampNum, trialNumGo);
+            for trialNo = 1:trialNumGo
+                if rejectFlag(trialNo) == 1, continue; end
+                for compNo = 1:compNum
+                    singleTrialERP(:, trialNo) = singleTrialERP(:, trialNo) + ...
+                        ampEst(trialNo, compNo) * real(fun_shift(waveformEst(:, compNo), latencyEst(trialNo, compNo), 1));
+                end
+            end
             save(resultName, 'ampEst', 'latencyEst', 'waveformEst','coeffAR','noiseFreq','sigma','residualSignalTime', 'rejectFlag',...
-                'compNumSet', 'waveformInitSet','compNum', 'dataChanGo','dataChanNogo','dataAERPNogo', 'dataAERPGo','chanNo','sampNum');
+                'compNumSet', 'waveformInitSet','compNum', 'dataChanGo','dataChanNogo','dataAERPNogo', 'dataAERPGo','chanNo','sampNum', ...
+                'singleTrialERP', 'sampFreq', 'preStimulusTime');
         elseif go_or_nogo==0
             dataFreqNogo=fft(dataChanNogo, freqSampNum);
             % Perform ASEO algorithm
             [ampEst, latencyEst, waveformEst,coeffAR,noiseFreq,sigma,residualSignalTime, rejectFlag,errEst]=function_ASEO(dataFreqNogo, waveformInitFreq);
 
+            % Compute single-trial ERP reconstructions for Python report visualisation
+            singleTrialERP = zeros(sampNum, trialNumNogo);
+            for trialNo = 1:trialNumNogo
+                if rejectFlag(trialNo) == 1, continue; end
+                for compNo = 1:compNum
+                    singleTrialERP(:, trialNo) = singleTrialERP(:, trialNo) + ...
+                        ampEst(trialNo, compNo) * real(fun_shift(waveformEst(:, compNo), latencyEst(trialNo, compNo), 1));
+                end
+            end
             save(resultName, 'ampEst', 'latencyEst', 'waveformEst','coeffAR','noiseFreq','sigma','residualSignalTime', 'rejectFlag',...
-                'compNumSet', 'waveformInitSet','compNum', 'dataChanGo','dataChanNogo','dataAERPNogo', 'dataAERPGo','chanNo','sampNum');
+                'compNumSet', 'waveformInitSet','compNum', 'dataChanGo','dataChanNogo','dataAERPNogo', 'dataAERPGo','chanNo','sampNum', ...
+                'singleTrialERP', 'sampFreq', 'preStimulusTime');
         end
 
     end;
