@@ -123,22 +123,19 @@ The simulation follows paper Example 1 (Section V-A-1): R=220 trials, T=120 samp
 
 ## Quantitative Summary Output
 
-`Main_ASEO.m` appends a row to `results/LU/{Go,Nogo}/summary_stats.csv` after each channel completes. Columns:
+`Main_ASEO.m` writes one row per channel to `reports/LU_monkey_Go_statistics.csv` and `reports/LU_monkey_Nogo_statistics.csv` after each channel completes. The file is cleared at the start of each run so re-running always produces a clean 16-row file. Columns:
 
 | Column | Description |
 |---|---|
-| `chan` | Channel number |
-| `condition` | `Go` or `Nogo` |
-| `compNum` | Number of ERP components |
+| `Condition` | `Go` or `Nogo` |
+| `Channel` | Channel number |
 | `AcceptRate_pct` | Percentage of trials accepted (0–100) |
-| `latMean_c<N>` / `latSD_c<N>` | Per-component mean ± SD latency shift (ms) |
-| `ampMean_c<N>` / `ampSD_c<N>` | Per-component mean ± SD amplitude |
-| `rtCorr_c<N>` / `rtCorrP_c<N>` | Latency–RT Pearson r and p-value (Go only) |
-| `varReduction` | Variance reduction ratio: ASEO residual / AERP residual |
-| `arOrder` | AR model order chosen by BIC |
-| `psdPeakHz` | Ongoing activity PSD peak frequency (Hz) |
-
-The file is created on the first write and appended on subsequent runs, so running multiple channels or re-running the script accumulates results in one place.
+| `LatMean_C<N>_ms` / `LatSD_C<N>_ms` | Per-component mean ± SD latency shift (ms) |
+| `AmpMean_C<N>` / `AmpSD_C<N>` | Per-component mean ± SD amplitude |
+| `RTCorr_C<N>` / `RTCorrP_C<N>` | Latency–RT Pearson r and p-value (Go only; NaN for Nogo) |
+| `VarReductionRatio` | Variance reduction ratio: ASEO residual / AERP residual |
+| `AROrder` | AR model order chosen by BIC |
+| `PSDPeakFreq_Hz` | Ongoing activity PSD peak frequency (Hz) |
 
 ---
 
@@ -148,10 +145,10 @@ The file is created on the first write and appended on subsequent runs, so runni
 
 ```matlab
 cd scripts
-Plot_Figure12   % reads results/LU/{Go,Nogo}/*.mat, saves *_Figure12_chan<N>.jpg
+Plot_Figure12   % reads results/LU/{Go,Nogo}/*.mat, saves *_Figure12_chan<N>.jpg there
 ```
 
-**Outputs saved alongside existing per-channel results:**
+**Outputs saved to `results/LU/Go/` and `results/LU/Nogo/`:**
 
 | File | Content |
 |---|---|
