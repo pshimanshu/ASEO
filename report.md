@@ -184,9 +184,95 @@ On channels with good acceptance rates (e.g. Ch 5, Ch 8, Ch 11), the ASEO compon
 
 ---
 
+---
+
+## Step 5 — Single-Trial ERP Report & Presentation
+
+### MATLAB change (`scripts/Main_ASEO.m`)
+
+Both the Go and Nogo save calls were updated to also write three new variables to each per-channel `.mat` file:
+
+| Variable | Description |
+| --- | --- |
+| `singleTrialERP` | `[sampNum × nTrials]` — per-trial ERP reconstruction `Σ β_rn · s_n(t − τ_rn)` |
+| `sampFreq` | Sampling frequency (global, not previously saved) |
+| `preStimulusTime` | Pre-stimulus duration in ms (local variable, not previously saved) |
+
+`singleTrialERP` is computed inline after each `function_ASEO` call using `fun_shift` and the estimated amplitudes/latencies. Rejected trials are left as zero columns. Re-run `Main_ASEO.m` with `LoadFlag=0` to regenerate `.mat` files with these fields; the Python script will fall back to computing `singleTrialERP` itself if the field is absent.
+
+### Python report pipeline (`helpers/generate_report.py`)
+
+A self-contained Python script that reads the `.mat` result files and produces all report outputs. Not tracked in git (under `helpers/` which is gitignored).
+
+**Run:**
+```bash
+pip install numpy scipy matplotlib python-pptx
+python helpers/generate_report.py
+```
+
+Outputs go to `reports/` (figures gitignored, PPT tracked).
+
+#### 4-panel single-trial figure (per channel × condition)
+
+Matches Prof. Ding's reference layout exactly:
+
+| Panel | Content |
+| --- | --- |
+| Top-left | **Raw Data** — all trials overlaid as coloured lines |
+| Top-right | **Single-Trial ERP** — ASEO-estimated ERP for each accepted trial |
+| Bottom-left | **Ongoing Activities** — residual after ERP removal per accepted trial |
+| Bottom-right | **AERP comparison** — traditional AERP (blue) vs mean of single-trial ERPs (red), with amplitude SD error bar at peak |
+
+Saved as `reports/figures/ch<N>_<Cond>_4panel.png` for all 16 channels × 2 conditions = 32 figures.
+
+The Raw Data and Ongoing panels share the same y-scale (full amplitude range) so the noise reduction is visually apparent. Trial colours are consistent across all four panels so individual trials can be tracked.
+
+#### Multi-channel AERP overview figure
+
+A single 4×4 grid (`reports/figures/multichannel_aerp_overview.png`) showing all 16 channels simultaneously, each panel containing four lines:
+
+| Line | Meaning |
+| --- | --- |
+| Blue solid | Go AERP |
+| Blue dashed | Go ASEO AERP |
+| Red solid | Nogo AERP |
+| Red dashed | Nogo ASEO AERP |
+
+Y-axis is auto-scaled per channel so waveform shape is visible regardless of amplitude. Channel 7 (`somm`) and Channel 8 (`somv`) are labelled with their anatomical identifiers. This figure gives an immediate spatial overview of: which channels have clean ERPs, where Go and Nogo diverge most, and how much ASEO sharpens the waveform relative to plain averaging across the electrode array.
+
+#### Variance reduction bar chart
+
+`reports/figures/variance_reduction.png` — Go and Nogo variance reduction ratios for all 16 channels side by side. Built from `summary_stats.csv`.
+
+#### PowerPoint presentation (`reports/ASEO_Presentation.pptx`)
+
+18 slides covering:
+
+1. Title
+2. Motivation (why single-trial analysis)
+3. VSPOA signal model
+4. F-step / T-step algorithm
+5. Dataset & experimental setup
+6. Bug fixes (3 bugs)
+7. New contributions (4 items)
+8–13. Single-trial ERP 4-panel figures (Ch 5, 8, 3 × Go + Nogo)
+14. Latency–RT correlation results
+15. Variance reduction (two-column: text + bar chart)
+16. Multi-channel AERP overview
+17. Synthetic validation RMSE vs SNR
+18. Summary & next steps
+
+### Project documentation (`PROJECT_OVERVIEW.md`)
+
+A comprehensive onboarding document at the project root covering the paper background, VSPOA model derivation, algorithm flow, file responsibilities, how to run the code, parameter tuning guide, results interpretation, and data format reference. Gitignored (generated artefact).
+
+---
+
 ## What's Still Needed
 
 | Item | Status |
 | --- | --- |
 | SNR sweep (paper Fig 5) | Complete — see Step 3 above |
+| Single-trial ERP figures | Complete — see Step 5 above |
+| PowerPoint presentation | Complete — see Step 5 above |
 | Multi-monkey batch (LU30, GE, TIO) | Blocked on dataset availability |
