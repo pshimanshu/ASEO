@@ -133,7 +133,13 @@ else
     dataPath = fullfile(scriptDir, '..', 'results', 'LU', 'Nogo', filesep);
 end
 if ~exist(dataPath, 'dir'), mkdir(dataPath); end
-summaryCSV = fullfile(dataPath, 'summary_stats.csv');
+reportsPath = fullfile(scriptDir, '..', 'reports');
+if ~exist(reportsPath, 'dir'), mkdir(reportsPath); end
+if go_or_nogo==1
+    summaryCSV = fullfile(reportsPath, 'LU_monkey_Go_statistics.csv');
+else
+    summaryCSV = fullfile(reportsPath, 'LU_monkey_Nogo_statistics.csv');
+end
 if exist(summaryCSV, 'file'), delete(summaryCSV); end  % start fresh each run
 figNum=0;
 for kkk=1:chanNum
