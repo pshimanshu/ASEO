@@ -8,3 +8,5 @@ data/lu_nogo_grp.mat
 helpers/
 PROJECT_OVERVIEW.md
 reports/figures/
+images/
+*.zip
